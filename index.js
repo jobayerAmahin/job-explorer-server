@@ -49,11 +49,28 @@ async function run() {
 
     app.post('/job-application',async(req,res)=>{
       const applicationData=req.body
-      console.log(applicationData)
       const result=await applicationCollection.insertOne(applicationData)
-      
       res.send(result)
     })
+
+    app.get('/job-application',async(req,res)=>{
+      const email=req.query.email
+      const query={applicantEmail:email}
+      const result=await applicationCollection.find(query).toArray()
+
+      for(const appliCation of result){
+        const query1={_id:new ObjectId(appliCation.jobId)}
+        const jobResult=await jobCollection.findOne(query1)
+        if(jobResult){
+          appliCation.jobType=jobResult.jobType
+          appliCation.company=jobResult.company
+          appliCation.title=jobResult.title
+        }
+      }
+      res.send(result)
+    })
+
+
 
     //Test Data
 
